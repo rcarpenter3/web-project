@@ -16,13 +16,27 @@ const ADD_TRANSACTION = gql`
     }
   }
 `
+const UPDATE_TRANSACTION = gql`
+  mutation UpdateTransaction($id: String, $amount: Float, $credit: Boolean, $debit: Boolean, $description: String, $merchant_name: String, $date: String) {
+    updateTransaction(id: $id, amount: $amount, credit: $credit, debit: $debit, description: $description, merchant_name: $merchant_name, date: $date) {
+      id
+      amount
+      credit
+      debit
+      description
+      merchant_name
+      date
+    }
+  }
+`
 
-export function TransactionForm (props) {
+export default function TransactionForm (props) {
   TransactionForm.propTypes = {
     isEditing: PropTypes.bool,
+    setIsEditing: PropTypes.func,
     transaction: PropTypes.object
   }
-  const { isEditing } = props
+  const { isEditing, setIsEditing } = props
   const [transaction, setTransaction] = useState(props && props.transaction ? props.transaction : {})
 
   function handleChange (event) {
@@ -43,6 +57,31 @@ export function TransactionForm (props) {
     } else {
       setTransaction({ ...transaction, credit: false, debit: false })
     }
+  }
+
+  function updateButton () {
+    return (
+      <Mutation mutation={UPDATE_TRANSACTION} variables={transaction}>
+        {updateTransaction => (
+          <button onClick={() => updateTransactionClick(updateTransaction)} type='submit'>Update</button>
+        )}
+      </Mutation>
+    )
+  }
+
+  function updateTransactionClick (updateTransaction) {
+    setIsEditing(false)
+    updateTransaction()
+  }
+
+  function saveButton () {
+    return (
+      <Mutation mutation={ADD_TRANSACTION} variables={transaction}>
+        {addTransaction => (
+          <button onClick={addTransaction} type='submit'>Save</button>
+        )}
+      </Mutation>
+    )
   }
 
   return (
@@ -83,11 +122,7 @@ export function TransactionForm (props) {
           </select>
         </label>
       </form>
-      <Mutation mutation={ADD_TRANSACTION} variables={transaction}>
-        {addTransaction => (
-          <button onClick={addTransaction} type='submit'>{isEditing ? 'Update' : 'Save'}</button>
-        )}
-      </Mutation>
+      {isEditing ? updateButton() : saveButton()}
     </div>
   )
 }

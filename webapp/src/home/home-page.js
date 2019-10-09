@@ -1,6 +1,6 @@
 import React from 'react'
 import { SpendSummary } from '../components/spend-summary.component.js'
-import { TransactionForm } from '../components/transaction-form.component.js'
+import TransactionForm from '../components/transaction-form.component.js'
 import { TransactionList } from '../components/transaction-list.component.js'
 
 export function Home () {
