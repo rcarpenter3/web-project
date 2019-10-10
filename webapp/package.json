@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@apollo/react-hooks": "^3.1.2",
-    "@emotion/core": "10.0.10",
+    "@emotion/core": "^10.0.10",
     "@emotion/styled": "10.0.12",
     "apollo-boost": "^0.4.4",
     "apollo-cache-inmemory": "1.6.2",
@@ -51,11 +51,13 @@
     "emotion-theming": "10.0.10",
     "graphql": "^14.3.1",
     "graphql-tag": "^2.10.1",
+    "moment": "^2.24.0",
     "prop-types": "^15.7.2",
     "react": "16.8.6",
     "react-apollo": "2.5.2",
     "react-dom": "16.8.6",
     "react-hot-loader": "4.11.0",
+    "react-icons": "^3.7.0",
     "react-router-dom": "5.0.1"
   },
   "devDependencies": {

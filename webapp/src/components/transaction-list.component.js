@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import gql from 'graphql-tag'
 import { Query } from 'react-apollo'
 import { Transaction } from './transaction.component.js'
+import { css } from '@emotion/core'
 
 export const GET_TRANSACTIONS = gql`
   query GetTransactions{
@@ -20,17 +21,20 @@ export const GET_TRANSACTIONS = gql`
 
 export function TransactionList () {
   const [transactions, setTransactions] = useState([])
+  const [isEditingTransaction, setIsEditingTransaction] = useState(false)
+  console.log(isEditingTransaction)
 
   return (
     <div>
-      <h2>Transaction List</h2>
-      <table>
-        <thead>
+      <table css={table}>
+        <thead css={[left, header]}>
           <tr>
             <th>Date</th>
             <th>Merchant</th>
             <th>Amount</th>
             <th>Category</th>
+            <th css={giveWidth}>{isEditingTransaction ? 'Transaction Type' : ''}</th>
+            <th css={giveWidth} />
           </tr>
         </thead>
         <tbody>
@@ -44,6 +48,7 @@ export function TransactionList () {
                   return (
                     <Transaction
                       key={transaction.id}
+                      setIsEditingTransaction={setIsEditingTransaction}
                       transaction={transaction}
                     />
                   )
@@ -56,3 +61,27 @@ export function TransactionList () {
     </div>
   )
 }
+
+const left = css`
+  text-align: left;
+`
+
+const header = css`
+  border-bottom: solid 1px #1C2321;
+`
+
+const table = css`
+  margin: 20px auto;
+  width: 100%;
+  border-collapse: collapse;
+    tr:nth-of-type(even) {
+      background-color: #EEF1EF;
+    }
+    tr {
+      line-height: 32px;
+    }
+`
+
+const giveWidth = css`
+  width: 20%;
+`
