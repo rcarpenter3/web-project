@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import gql from 'graphql-tag'
 import { Query } from 'react-apollo'
 import { Transaction } from './transaction.component.js'
 
-const GET_TRANSACTIONS = gql`
+export const GET_TRANSACTIONS = gql`
   query GetTransactions{
     transactions {
       id
@@ -19,6 +19,8 @@ const GET_TRANSACTIONS = gql`
 `
 
 export function TransactionList () {
+  const [transactions, setTransactions] = useState([])
+
   return (
     <div>
       <h2>Transaction List</h2>
@@ -32,14 +34,18 @@ export function TransactionList () {
           </tr>
         </thead>
         <tbody>
-          <Query query={GET_TRANSACTIONS}>
+          <Query query={GET_TRANSACTIONS} refetchQueries={GET_TRANSACTIONS}>
             {({ loading, error, data }) => {
               if (loading) return 'Loading...'
               if (error) return `Error! ${error.message}`
+              setTransactions(data.transactions)
               return (
-                data.transactions.map(transaction => {
+                transactions.map(transaction => {
                   return (
-                    <Transaction key={transaction.id} transaction={transaction} />
+                    <Transaction
+                      key={transaction.id}
+                      transaction={transaction}
+                    />
                   )
                 })
               )

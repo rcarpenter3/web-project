@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import TransactionForm from './transaction-form.component.js'
 import gql from 'graphql-tag'
 import { Mutation } from 'react-apollo'
+import { GET_TRANSACTIONS } from './transaction-list.component.js'
 
 export function Transaction (props) {
   Transaction.propTypes = {
@@ -17,7 +18,8 @@ export function Transaction (props) {
     }
   `
   const { transaction } = props
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState()
+
   return (
     <div>
       {/*
@@ -56,7 +58,16 @@ export function Transaction (props) {
     return (
       <Mutation mutation={DELETE_TRANSACTION} variables={{ id }}>
         {deleteTransaction => (
-          <button onClick={deleteTransaction} type='submit'>Delete</button>
+          <button
+            onClick={() =>
+              deleteTransaction({
+                variables: { id: transaction.id },
+                refetchQueries: [{ query: GET_TRANSACTIONS }]
+              })
+            }
+            type='submit'>
+              Delete
+          </button>
         )}
       </Mutation>
     )

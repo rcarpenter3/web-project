@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 import gql from 'graphql-tag'
 import { Mutation } from 'react-apollo'
+import { GET_TRANSACTIONS } from './transaction-list.component.js'
 
 const ADD_TRANSACTION = gql`
   mutation AddTransaction($amount: Float, $credit: Boolean, $debit: Boolean, $description: String, $merchant_name: String, $date: String) {
@@ -38,6 +39,7 @@ export default function TransactionForm (props) {
   }
   const { isEditing, setIsEditing } = props
   const [transaction, setTransaction] = useState(props && props.transaction ? props.transaction : {})
+  const formRef = useRef(null)
 
   function handleChange (event) {
     let value
@@ -61,32 +63,52 @@ export default function TransactionForm (props) {
 
   function updateButton () {
     return (
-      <Mutation mutation={UPDATE_TRANSACTION} variables={transaction}>
+      <Mutation key={transaction.id} mutation={UPDATE_TRANSACTION}>
         {updateTransaction => (
-          <button onClick={() => updateTransactionClick(updateTransaction)} type='submit'>Update</button>
+          <button onClick={() => {
+            setIsEditing(false)
+            updateTransaction({
+              variables: transaction,
+              refetchQueries: [{ query: GET_TRANSACTIONS }]
+            })
+          }} type='submit'>
+            Update
+          </button>
         )}
       </Mutation>
     )
-  }
-
-  function updateTransactionClick (updateTransaction) {
-    setIsEditing(false)
-    updateTransaction()
   }
 
   function saveButton () {
     return (
-      <Mutation mutation={ADD_TRANSACTION} variables={transaction}>
+      <Mutation
+        mutation={ADD_TRANSACTION}
+        variables={transaction}
+      >
         {addTransaction => (
-          <button onClick={addTransaction} type='submit'>Save</button>
+          <button
+            onClick={() => {
+              addTransaction({
+                variables: transaction,
+                refetchQueries: [{ query: GET_TRANSACTIONS }]
+              })
+              setTransaction({})
+            }}
+            type='submit'>
+              Save
+          </button>
         )}
       </Mutation>
     )
   }
 
+  function clearForm (ref) {
+    ref.current && ref.current.reset()
+  }
+
   return (
     <div>
-      <form>
+      <form onSubmit={clearForm(formRef)} ref={formRef}>
         <label>
           Date
           <input name='date' onChange={handleChange} type='date' value={transaction.date} />
@@ -115,7 +137,7 @@ export default function TransactionForm (props) {
           </select>
         </label>
         <label>
-          <select name='type'onBlur={handleTypeChange} value={transaction.type}>
+          <select name='type'onBlur={handleTypeChange} value={transaction.credit ? 'credit' : 'debit'}>
             <option value=''>Select transaction type</option>
             <option value='debit'>Debit</option>
             <option value='credit'>Credit</option>
