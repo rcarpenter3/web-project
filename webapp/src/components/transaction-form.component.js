@@ -2,16 +2,14 @@ import React, { useState, useRef } from 'react'
 import PropTypes from 'prop-types'
 import gql from 'graphql-tag'
 import { Mutation } from 'react-apollo'
-import { GET_TRANSACTIONS } from './transaction-list.component.js'
 import { css } from '@emotion/core'
 
 const ADD_TRANSACTION = gql`
-  mutation AddTransaction($amount: Float, $credit: Boolean, $debit: Boolean, $description: String, $merchant_name: String, $date: String) {
-    addTransaction(amount: $amount, credit: $credit, debit: $debit, description: $description, merchant_name: $merchant_name, date: $date) {
+  mutation AddTransaction($amount: Float, $transaction_type: String $description: String, $merchant_name: String, $date: String) {
+    addTransaction(amount: $amount, transaction_type: $transaction_type, description: $description, merchant_name: $merchant_name, date: $date) {
       id
       amount
-      credit
-      debit
+      transaction_type
       description
       merchant_name
       date
@@ -21,9 +19,10 @@ const ADD_TRANSACTION = gql`
 export default function TransactionForm (props) {
   TransactionForm.propTypes = {
     transaction: PropTypes.object,
-    setIsAdding: PropTypes.func
+    setIsAdding: PropTypes.func,
+    getTransactions: PropTypes.func
   }
-  const { setIsAdding } = props
+  const { setIsAdding, getTransactions } = props
   const [transaction, setTransaction] = useState(props && props.transaction ? props.transaction : {})
   const formRef = useRef(null)
 
@@ -37,16 +36,6 @@ export default function TransactionForm (props) {
     setTransaction({ ...transaction, [event.target.name]: value })
   }
 
-  function handleTypeChange (event) {
-    if (event.target.value && event.target.value === 'debit') {
-      setTransaction({ ...transaction, debit: true, credit: false })
-    } else if (event.target.value && event.target.value === 'credit') {
-      setTransaction({ ...transaction, credit: true, debit: false })
-    } else {
-      setTransaction({ ...transaction, credit: false, debit: false })
-    }
-  }
-
   function saveButton () {
     return (
       <Mutation
@@ -58,7 +47,7 @@ export default function TransactionForm (props) {
             onClick={() => {
               addTransaction({
                 variables: transaction,
-                refetchQueries: [{ query: GET_TRANSACTIONS }]
+                refetchQueries: [{ query: getTransactions }]
               })
               setIsAdding(false)
             }}
@@ -97,8 +86,8 @@ export default function TransactionForm (props) {
           <option value='utilities'>Utilities</option>
         </select>
         <label>{'Transaction Type: '}</label>
-        <select name='type' onBlur={handleTypeChange} value={''}>
-          <option value=''>Select transaction type</option>
+        <select name='transaction_type' onBlur={handleChange} value={transaction.transaction_type}>
+          <option value='select'>Select transaction type</option>
           <option value='debit'>Debit</option>
           <option value='credit'>Credit</option>
         </select>

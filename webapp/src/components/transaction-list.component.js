@@ -1,28 +1,17 @@
 import React, { useState } from 'react'
-import gql from 'graphql-tag'
-import { Query } from 'react-apollo'
+import PropTypes from 'prop-types'
 import { Transaction } from './transaction.component.js'
 import { css } from '@emotion/core'
 
-export const GET_TRANSACTIONS = gql`
-  query GetTransactions{
-    transactions {
-      id
-      user_id
-      credit
-      debit
-      description
-      merchant_name
-      date
-      amount
-    }
+export function TransactionList (props) {
+  TransactionList.propTypes = {
+    transactions: PropTypes.array,
+    loading: PropTypes.bool,
+    error: PropTypes.func,
+    getTransactions: PropTypes.object
   }
-`
-
-export function TransactionList () {
-  const [transactions, setTransactions] = useState([])
+  const { loading, error, transactions, getTransactions } = props
   const [isEditingTransaction, setIsEditingTransaction] = useState(false)
-  console.log(isEditingTransaction)
 
   return (
     <div>
@@ -38,24 +27,18 @@ export function TransactionList () {
           </tr>
         </thead>
         <tbody>
-          <Query query={GET_TRANSACTIONS} refetchQueries={GET_TRANSACTIONS}>
-            {({ loading, error, data }) => {
-              if (loading) return 'Loading...'
-              if (error) return `Error! ${error.message}`
-              setTransactions(data.transactions)
-              return (
-                transactions.map(transaction => {
-                  return (
-                    <Transaction
-                      key={transaction.id}
-                      setIsEditingTransaction={setIsEditingTransaction}
-                      transaction={transaction}
-                    />
-                  )
-                })
-              )
-            }}
-          </Query>
+          { loading && <tr><td>Loading...</td></tr> }
+          { error && <tr><td>`Error! ${error.message}`</td></tr> }
+          { transactions && transactions.map(transaction => {
+            return (
+              <Transaction
+                getTransactions={getTransactions}
+                key={transaction.id}
+                setIsEditingTransaction={setIsEditingTransaction}
+                transaction={transaction}
+              />
+            )
+          })}
         </tbody>
       </table>
     </div>

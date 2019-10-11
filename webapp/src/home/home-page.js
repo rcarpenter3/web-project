@@ -1,26 +1,49 @@
 import { css } from '@emotion/core'
 import React, { useState } from 'react'
+import gql from 'graphql-tag'
 import { SpendSummary } from '../components/spend-summary/spend-summary.component.js'
 import TransactionForm from '../components/transaction-form.component.js'
+import { Query } from 'react-apollo'
 import { TransactionList } from '../components/transaction-list.component.js'
+
+const GET_TRANSACTIONS = gql`
+  query GetTransactions{
+    transactions {
+      id
+      user_id
+      transaction_type
+      description
+      merchant_name
+      date
+      amount
+    }
+  }
+`
 
 export function Home () {
   const [isAdding, setIsAdding] = useState(false)
   return (
     <div css={home}>
-      <h1>Spend Summary</h1>
-      <SpendSummary />
-      <div css={flex}>
-        <h1>Manage Transactions</h1>
-        { !isAdding &&
-          <button css={buttonStyle} onClick={() => setIsAdding(true)}> + Add Transaction</button>
-        }
-      </div>
-      { isAdding &&
-        <TransactionForm setIsAdding={setIsAdding} />
-      }
-      <hr />
-      <TransactionList />
+      <Query query={GET_TRANSACTIONS} refetchQueries={GET_TRANSACTIONS}>
+        {({ data, loading, error }) => {
+          return (
+            <>
+              <SpendSummary transactions={data.transactions} />
+              <div css={flex}>
+                <h1>Manage Transactions</h1>
+                { !isAdding &&
+                  <button css={buttonStyle} onClick={() => setIsAdding(true)}> + Add Transaction</button>
+                }
+              </div>
+              { isAdding &&
+                <TransactionForm getTransactions={GET_TRANSACTIONS} setIsAdding={setIsAdding} />
+              }
+              <hr />
+              <TransactionList error={error} getTransactions={GET_TRANSACTIONS} loading={loading} transactions={data.transactions} />
+            </>
+          )
+        }}
+      </Query>
     </div>
   )
 }
