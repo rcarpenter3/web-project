@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Transaction } from './transaction.component.js'
 import { css } from '@emotion/core'
+import _ from 'lodash'
 
 export function TransactionList (props) {
   TransactionList.propTypes = {
@@ -12,16 +13,26 @@ export function TransactionList (props) {
   }
   const { loading, error, transactions, getTransactions } = props
   const [isEditingTransaction, setIsEditingTransaction] = useState(false)
+  const [orderedTransactions, setOrderedTransactions] = useState([])
+  const [ascending, setAscending] = useState(true)
+  useOrderedTransactions()
+
+  function useOrderedTransactions () {
+    useEffect(() => {
+      const ordered = _.sortBy(transactions, ['date', 'description'])
+      setOrderedTransactions(ordered)
+    }, [transactions])
+  }
 
   return (
     <div>
       <table css={table}>
         <thead css={[left, header]}>
           <tr>
-            <th>Date</th>
-            <th>Merchant</th>
-            <th>Amount</th>
-            <th>Category</th>
+            <th onClick={() => sortList('date')}>Date</th>
+            <th onClick={() => sortList('merchant_name')}>Merchant</th>
+            <th onClick={() => sortList('amount')}>Amount</th>
+            <th onClick={() => sortList('description')}>Category</th>
             <th css={giveWidth}>{isEditingTransaction ? 'Transaction Type' : ''}</th>
             <th css={giveWidth} />
           </tr>
@@ -29,7 +40,7 @@ export function TransactionList (props) {
         <tbody>
           { loading && <tr><td>Loading...</td></tr> }
           { error && <tr><td>`Error! ${error.message}`</td></tr> }
-          { transactions && transactions.map(transaction => {
+          { orderedTransactions && orderedTransactions.map(transaction => {
             return (
               <Transaction
                 getTransactions={getTransactions}
@@ -43,6 +54,10 @@ export function TransactionList (props) {
       </table>
     </div>
   )
+  function sortList (sortBy) {
+    ascending ? setOrderedTransactions(_.sortBy(transactions, [sortBy, 'description'])) : setOrderedTransactions(_.sortBy(transactions, [sortBy, 'description']).reverse())
+    setAscending(prevState => !prevState)
+  }
 }
 
 const left = css`
@@ -51,6 +66,10 @@ const left = css`
 
 const header = css`
   border-bottom: solid 1px #1C2321;
+  th:hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 `
 
 const table = css`

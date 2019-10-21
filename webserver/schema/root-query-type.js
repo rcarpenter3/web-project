@@ -3,7 +3,6 @@ const TransactionType = require('./transaction-type')
 const Transactions = require('../query-resolvers/transaction-resolvers.js')
 
 const {
-  GraphQLBoolean,
   GraphQLFloat,
   GraphQLList,
   GraphQLObjectType,
@@ -25,8 +24,7 @@ const RootQuery = new GraphQLObjectType({
       type: GraphQLList(TransactionType),
       args: {
         amount: { type: GraphQLFloat },
-        credit: { type: GraphQLBoolean },
-        debit: { type: GraphQLBoolean },
+        transaction_type: { type: GraphQLString },
         description: { type: GraphQLString },
         merchant_name: { type: GraphQLString },
         user_id: { type: GraphQLString },
